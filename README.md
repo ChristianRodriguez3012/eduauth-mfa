@@ -33,7 +33,7 @@ Este sistema implementa un flujo completo de autenticación segura con verificac
 
 1. Clona el repositorio:
 
-git clone https://github.com/<TU-USUARIO>/eduauth-mfa.git
+git clone https://github.com/ChristianRodriguez3012/eduauth-mfa.git
 cd eduauth-mfa
 
 
