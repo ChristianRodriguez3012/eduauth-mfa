@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Recuperar acceso - EduAuth</title>
+  <link rel="stylesheet" href="static/css/style.css" />
+</head>
+<body>
+  <h1>Recuperar contraseña</h1>
+  <div id="alert" class="alert"></div>
+
+  <!-- Paso 1: Solicitar token -->
+  <form id="form-request-reset">
+    <h2>Solicitar token</h2>
+    <input name="email" placeholder="Email" required>
+    <button>Solicitar token</button>
+  </form>
+
+  <!-- Paso 2: Usar token y nueva contraseña -->
+  <form id="form-reset-password">
+    <h2>Restablecer contraseña</h2>
+    <input name="token" placeholder="Token de recuperación" required>
+    <input name="new_password" type="password" placeholder="Nueva contraseña" required>
+    <button>Resetear contraseña</button>
+  </form>
+
+  <p><a href="login.html">Volver al login</a></p>
+
+  <script src="js/utils.js"></script>
+  <script src="js/recovery.js"></script>
+</body>
+</html>

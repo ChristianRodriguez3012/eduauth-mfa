@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Panel Admin - EduAuth</title>
+  <style>
+    body { font-family: sans-serif; max-width: 900px; margin: 2rem auto; }
+    h1, h2 { text-align: center; }
+    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+    th, td { padding: 0.5rem; border: 1px solid #ccc; text-align: left; }
+    .status-ok { color: green; font-weight: bold; }
+    .status-fail { color: red; font-weight: bold; }
+    #logout, #copy-token {
+      margin: 1rem auto;
+      display: block;
+      padding: .5rem 1rem;
+      background: #f44336;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    #copy-token { background: #2196F3; }
+    #jwt-container {
+      margin-top: 2rem;
+      background: #f4f4f4;
+      padding: 1rem;
+      border: 1px solid #ccc;
+      word-break: break-word;
+    }
+    form {
+      margin-top: 2rem;
+      padding: 1rem;
+      border: 1px solid #ccc;
+      background: #fafafa;
+    }
+    form label { display: block; margin: 0.5rem 0; }
+    form input, form select {
+      padding: 0.4rem;
+      width: 100%;
+      max-width: 300px;
+    }
+    form button { margin-top: 1rem; padding: 0.5rem 1rem; }
+    #dni-status {
+      text-align: center;
+      margin-top: 1rem;
+      font-weight: bold;
+    }
+    .delete-btn, .update-btn {
+      background-color: #e91e63;
+      color: white;
+      border: none;
+      padding: 4px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .update-btn {
+      background-color: #4caf50;
+      margin-left: 5px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Panel de Administración</h1>
+  <button id="logout">Cerrar sesión</button>
+
+  <h2>Historial de intentos de login</h2>
+  <table id="attempts-table">
+    <thead>
+      <tr>
+        <th>Email</th>
+        <th>Estado</th>
+        <th>Hora</th>
+        <th>IP</th>
+        <th>Agente</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td colspan="5">Cargando...</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Token JWT actual</h2>
+  <div id="jwt-container">
+    <code id="jwt-token">Cargando token...</code>
+  </div>
+  <button id="copy-token">📋 Copiar token</button>
+
+  <h2>Registrar DNI aprobado</h2>
+  <form id="dni-form">
+    <label>
+      DNI:
+      <input type="text" id="dni" required>
+    </label>
+    <label>
+      Rol aprobado:
+      <select id="approved_role" required>
+        <option value="profesor">Profesor</option>
+        <option value="admin">Admin</option>
+      </select>
+    </label>
+    <button type="submit">Registrar</button>
+  </form>
+  <p id="dni-status"></p>
+
+  <h2>DNIs aprobados registrados</h2>
+  <table id="dnis-table">
+    <thead>
+      <tr>
+        <th>DNI</th>
+        <th>Rol aprobado</th>
+        <th>Acción</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td colspan="3">Cargando...</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Usuarios registrados (rol: estudiante)</h2>
+  <table id="students-table">
+    <thead>
+      <tr>
+        <th>Email</th>
+        <th>DNI</th>
+        <th>Registrado</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td colspan="3">Cargando...</td></tr>
+    </tbody>
+  </table>
+
+  <script>
+    const token = localStorage.getItem('admin_token');
+    const jwtContainer = document.getElementById('jwt-token');
+
+    if (!token) {
+      alert('⚠️ No hay token válido. Redirigiendo...');
+      window.location.href = 'index.html';
+    }
+
+    jwtContainer.textContent = token;
+
+    document.getElementById('copy-token').onclick = () => {
+      navigator.clipboard.writeText(token)
+        .then(() => alert('✅ Token copiado al portapapeles'))
+        .catch(() => alert('❌ Error al copiar el token'));
+    };
+
+    async function cargarIntentos() {
+      const tbody = document.querySelector('#attempts-table tbody');
+      try {
+        const res = await fetch('/user/login-attempts', {
+          headers: { Authorization: token }
+        });
+        const data = await res.json();
+
+        if (!Array.isArray(data)) {
+          tbody.innerHTML = `<tr><td colspan="5">⚠️ ${data.msg || 'Error desconocido'}</td></tr>`;
+          return;
+        }
+
+        tbody.innerHTML = data.length === 0
+          ? `<tr><td colspan="5">No hay intentos registrados.</td></tr>`
+          : data.map(a => `
+            <tr>
+              <td>${a.email}</td>
+              <td class="${a.success ? 'status-ok' : 'status-fail'}">
+                ${a.success ? '✅ Exitoso' : '❌ Fallido'}
+              </td>
+              <td>${new Date(a.timestamp).toLocaleString()}</td>
+              <td>${a.ip_address || '-'}</td>
+              <td>${a.user_agent || '-'}</td>
+            </tr>`).join('');
+      } catch {
+        tbody.innerHTML = `<tr><td colspan="5">Error al cargar datos</td></tr>`;
+      }
+    }
+
+    async function cargarDNIs() {
+      const tbody = document.querySelector('#dnis-table tbody');
+      tbody.innerHTML = `<tr><td colspan="3">Cargando...</td></tr>`;
+      try {
+        const res = await fetch('/admin/trusted-identities', {
+          headers: { Authorization: token }
+        });
+        const data = await res.json();
+
+        if (!Array.isArray(data)) {
+          tbody.innerHTML = `<tr><td colspan="3">⚠️ ${data.msg || 'No autorizado'}</td></tr>`;
+          return;
+        }
+
+        tbody.innerHTML = '';
+        for (const entry of data) {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${entry.dni}</td>
+            <td>${entry.approved_role ? entry.approved_role.charAt(0).toUpperCase() + entry.approved_role.slice(1) : 'Sin asignar'}</td>
+            <td><button class="delete-btn" data-dni="${entry.dni}">❌ Eliminar</button></td>
+          `;
+          tbody.appendChild(row);
+        }
+
+
+        document.querySelectorAll('.delete-btn').forEach(btn => {
+          btn.onclick = async () => {
+            const dni = btn.getAttribute('data-dni');
+            if (!confirm(`¿Eliminar el DNI ${dni}?`)) return;
+            try {
+              const res = await fetch('/admin/delete-identity', {
+                method: 'DELETE',
+                headers: {
+                  'Authorization': token,
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ dni })
+              });
+              const result = await res.json();
+              if (res.ok) {
+                alert('✅ ' + result.msg);
+                cargarDNIs();
+              } else {
+                alert('❌ ' + (result.msg || 'Error al eliminar'));
+              }
+            } catch {
+              alert('⚠️ Error al eliminar el DNI');
+            }
+          };
+        });
+
+        document.querySelectorAll('.update-btn').forEach(btn => {
+          btn.onclick = async () => {
+            const dni = btn.getAttribute('data-dni');
+            const select = document.querySelector(`select[data-dni="${dni}"]`);
+            const role = select.value;
+            try {
+              const res = await fetch('/admin/update-identity', {
+                method: 'PUT',
+                headers: {
+                  'Authorization': token,
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ dni, approved_role: role })
+              });
+              const result = await res.json();
+              if (res.ok) {
+                alert('✅ ' + result.msg);
+              } else {
+                alert('❌ ' + (result.msg || 'Error al actualizar rol'));
+              }
+            } catch {
+              alert('⚠️ Error de red al actualizar');
+            }
+          };
+        });
+      } catch {
+        tbody.innerHTML = `<tr><td colspan="3">❌ Error al cargar los DNIs</td></tr>`;
+      }
+    }
+
+    async function cargarAlumnos() {
+      const tbody = document.querySelector('#students-table tbody');
+      tbody.innerHTML = `<tr><td colspan="3">Cargando...</td></tr>`;
+      try {
+        const res = await fetch('/admin/student-identities', {
+          headers: { Authorization: token }
+        });
+        const data = await res.json();
+
+        if (!Array.isArray(data)) {
+          tbody.innerHTML = `<tr><td colspan="3">⚠️ ${data.msg || 'Error inesperado'}</td></tr>`;
+          return;
+        }
+
+        tbody.innerHTML = data.length === 0
+          ? `<tr><td colspan="3">No hay alumnos registrados</td></tr>`
+          : data.map(user => `
+            <tr>
+              <td>${user.email}</td>
+              <td>${user.dni || '-'}</td>
+              <td>${new Date(user.created_at).toLocaleString()}</td>
+            </tr>`).join('');
+      } catch {
+        tbody.innerHTML = `<tr><td colspan="3">❌ Error al cargar usuarios</td></tr>`;
+      }
+    }
+
+    document.getElementById('dni-form').onsubmit = async (e) => {
+      e.preventDefault();
+      const dni = document.getElementById('dni').value.trim();
+      const role = document.getElementById('approved_role').value;
+      const status = document.getElementById('dni-status');
+
+      if (!dni || !role) {
+        status.textContent = '⚠️ Debes ingresar un DNI y seleccionar un rol';
+        return;
+      }
+
+      try {
+        const res = await fetch('/admin/add-identity', {
+          method: 'POST',
+          headers: {
+            'Authorization': token,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ dni, approved_role: role })
+        });
+
+        const data = await res.json();
+        if (res.ok) {
+          status.textContent = '✅ ' + data.msg;
+          document.getElementById('dni-form').reset();
+          cargarDNIs();
+        } else {
+          status.textContent = '❌ ' + (data.msg || 'Error al registrar');
+        }
+      } catch {
+        status.textContent = '⚠️ Error de red o servidor';
+      }
+    };
+
+    document.getElementById('logout').onclick = () => {
+      localStorage.removeItem('admin_token');
+      window.location.href = 'index.html';
+    };
+
+    cargarIntentos();
+    cargarDNIs();
+    cargarAlumnos();
+  </script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Registro - EduAuth</title>
+  <link rel="stylesheet" href="static/css/style.css" />
+</head>
+<body>
+  <h1>Crear cuenta</h1>
+  <div id="alert" class="alert"></div>
+
+  <form id="form-register">
+    <input name="email" placeholder="Email" required>
+    <input name="password" type="password" placeholder="Contraseña" required>
+    <label for="role">Rol:</label>
+    <select name="role" id="role">
+      <option value="student">Estudiante</option>
+      <option value="profesor">Profesor</option>
+      <option value="admin">Admin</option>
+    </select>
+    <input name="dni" id="dni" placeholder="DNI (si aplica)" style="display:none;">
+    <button>Registrar</button>
+  </form>
+
+  <p><a href="login.html">¿Ya tienes cuenta? Inicia sesión</a></p>
+
+  <script src="js/utils.js"></script>
+  <script src="js/register.js"></script>
+</body>
+</html>

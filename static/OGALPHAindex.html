@@ -4,183 +4,29 @@
   <meta charset="UTF-8">
   <title>EduAuth MFA Demo</title>
   <style>
-  :root {
-    --main-color: #0077cc;
-    --bg: rgba(255, 255, 255, 0.75);
-    --border: #cce0f5;
-    --text: #333;
-    --radius: 12px;
-    --font: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  }
-
-  * {
-    box-sizing: border-box;
-  }
-
-  body {
-    margin: 0;
-    font-family: var(--font);
-    color: var(--text);
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    background: url('https://scontent.flim3-2.fna.fbcdn.net/v/t39.30808-6/287060442_176061551462128_7330973702636533778_n.jpg?_nc_cat=107&ccb=1-7&_nc_sid=2285d6&_nc_eui2=AeF6pYlZsfvgaCkrvwAuoGzBSvKgv1OX9q1K8qC_U5f2rdRQFTiBlqPK3ps-aJf9jURhIGsNNpfW3OnB1EHB6zjI&_nc_ohc=upNjVZOcz3EQ7kNvwEEEvTW&_nc_oc=AdnZWc18I_--X1gVZcejZBR9gDbek-RiQ2i5IcgsTu-ZpxzmzgsITQJ_4rEifGqLPWU&_nc_zt=23&_nc_ht=scontent.flim3-2.fna&_nc_gid=yf3RKzHN02JmZj4sPHmOeg&oh=00_AfOG0jzN1G6UAg2FSwP2cAT7FLj6msj90IYLEB3IZHJ45w&oe=6866FD5B') no-repeat center center fixed;
-    background-size: cover;
-    position: relative;
-  }
-
-  body::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    z-index: -1;
-  }
-
-  h1 {
-    margin-top: 2rem;
-    font-size: 2rem;
-    color: var(--main-color);
-  }
-
-  nav {
-    margin: 2rem 1rem 1rem;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    justify-content: center;
-  }
-
-  nav button {
-    background-color: var(--main-color);
-    color: white;
-    border: none;
-    padding: 0.5rem 1rem;
-    border-radius: var(--radius);
-    font-weight: bold;
-    cursor: pointer;
-    transition: background 0.3s ease;
-    flex: 1 1 150px;
-  }
-
-  nav button:hover {
-    background-color: #005fa3;
-  }
-
-  form {
-    width: 100%;
-    max-width: 480px;
-    background-color: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 1.5rem;
-    margin-bottom: 2rem;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-    display: none;
-  }
-
-  h2 {
-    color: var(--main-color);
-    margin-bottom: 1rem;
-    font-size: 1.3rem;
-  }
-
-  input, select, textarea {
-    width: 100%;
-    padding: 0.6rem;
-    margin-bottom: 0.75rem;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    font-size: 1rem;
-  }
-
-  button {
-    background-color: var(--main-color);
-    color: white;
-    border: none;
-    padding: 0.6rem;
-    border-radius: 6px;
-    font-size: 1rem;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background-color 0.3s;
-  }
-
-  button:hover {
-    background-color: #005fa3;
-  }
-
-  pre, code {
-    background: #f4f4f4;
-    padding: 0.75rem;
-    font-size: 0.85rem;
-    overflow-x: auto;
-    white-space: pre-wrap;
-    border-radius: 6px;
-    margin-top: 0.5rem;
-  }
-
-  .alert {
-    padding: 1rem;
-    margin: 1rem 0;
-    border-radius: 8px;
-    font-weight: bold;
-    display: none;
-  }
-
-  .alert.success {
-    background: #d4edda;
-    color: #155724;
-    border: 1px solid #c3e6cb;
-  }
-
-  .alert.error {
-    background: #f8d7da;
-    color: #721c24;
-    border: 1px solid #f5c6cb;
-  }
-
-  .alert.warn {
-    background: #fff3cd;
-    color: #856404;
-    border: 1px solid #ffeeba;
-  }
-</style>
-
+    body { font-family: sans-serif; max-width: 600px; margin: 2rem auto; }
+    form { margin-bottom: 1.5rem; padding: 1rem; border: 1px solid #ccc; }
+    input, button, select, textarea { display: block; width: 100%; margin-bottom: .5rem; }
+    code { background: #eee; padding: .5rem; display: block; word-break: break-all; }
+    .alert {
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 6px;
+      font-weight: bold;
+      display: none;
+    }
+    .alert.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+    .alert.error   { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+    .alert.warn    { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
+  </style>
 </head>
 <body>
-  <header style="text-align:center; margin-top: 2rem;">
-  <img src="assets/logo2.png" alt="EduAuth-MFA Logo" style="max-width: 150px; height: auto;">
-</header>
-
-
-  <nav>
-  <!-- Autenticación -->
-  <button onclick="showForm('form-register')">🧑‍🎓 Registro</button>
-  <button onclick="showForm('form-login')">🧑‍🎓 Login</button>
-
-  <!-- MFA -->
-  <button onclick="showForm('form-setup-mfa')">🔐 Setup MFA</button>
-  <button onclick="showForm('form-verify-mfa')">🔐 Verificar MFA</button>
-  <button onclick="showForm('form-login-mfa')">🔐 Login MFA</button>
-  <button onclick="showForm('form-profile')">🧑‍🎓 ACCEDER (TEST OK : Ver Perfil)</button>
-
-  <!-- Recuperación -->
-  <!-- <button onclick="showForm('form-request-reset')">♻️ Recuperar acceso</button> -->
-  <button onclick="showForm('form-reset-password')">♻️ Resetear contraseña</button>
-
-  <!-- Auditoría -->
-  <!-- <button onclick="showForm('form-login-attempts')">🧠 Ver intentos</button> -->
-  </nav>
-
+  <h1>EduAuth-MFA Demo</h1>
 
   <div id="alert" class="alert"></div>
 
   <!-- FORMULARIOS -->
-
-  <form id="form-register"><h2>🧑‍🎓 Registro</h2>
+  <form id="form-register"><h2>1. Registro</h2>
     <input name="email" placeholder="Email" required>
     <input name="password" type="password" placeholder="Contraseña" required>
     <label for="role">Rol:</label>
@@ -194,23 +40,23 @@
     <pre id="out-register"></pre>
   </form>
 
-  <form id="form-login"><h2>🧑‍🎓 Login</h2>
+  <form id="form-login"><h2>2. Login</h2>
     <input name="email" placeholder="Email" required>
     <input name="password" type="password" placeholder="Contraseña" required>
     <button>Login</button><pre id="out-login"></pre></form>
 
-  <form id="form-setup-mfa"><h2>🔐 Setup MFA</h2>
+  <form id="form-setup-mfa"><h2>3. Setup MFA</h2>
     <input name="email" placeholder="Email" required>
     <button>Generar QR</button>
     <img id="qr-img" alt="QR TOTP" style="display:block; margin:1rem 0; max-width:200px;">
     <pre id="out-setup-mfa"></pre></form>
 
-  <form id="form-verify-mfa"><h2>🔐 Verificar MFA</h2>
+  <form id="form-verify-mfa"><h2>4. Verificar MFA</h2>
     <input name="email" placeholder="Email" required>
     <input name="code" placeholder="Código TOTP" required>
     <button>Activar MFA</button><pre id="out-verify-mfa"></pre></form>
 
-  <form id="form-login-mfa"><h2>🔐 Login MFA</h2>
+  <form id="form-login-mfa"><h2>5. Login MFA</h2>
     <input name="email" placeholder="Email" required>
     <input name="code" placeholder="Código TOTP" required>
     <button>Login MFA</button>
@@ -218,28 +64,29 @@
     <code id="token-box" style="display: none;"></code>
   </form>
 
-  <form id="form-profile"><h2>🧑‍🎓 Perfil</h2>
+  <form id="form-profile"><h2>6. Perfil</h2>
     <input name="token" placeholder="Bearer &lt;TOKEN&gt;" required>
     <button>Ver Perfil</button><pre id="out-profile"></pre></form>
 
-
-  <form id="form-reset-password"><h2>♻️ Resetear contraseña</h2>
+  <form id="form-request-reset"><h2>7.1 Solicitar recuperación</h2>
     <input name="email" placeholder="Email" required>
     <button>Solicitar token</button>
     <pre id="out-request-reset"></pre>
+  </form>
+
+  <form id="form-reset-password"><h2>7.2 Resetear contraseña</h2>
     <input name="token" placeholder="Token de recuperación" required>
     <input name="new_password" type="password" placeholder="Nueva contraseña" required>
     <button>Resetear contraseña</button>
     <pre id="out-reset-password"></pre>
   </form>
 
-  <form id="form-login-attempts"><h2>🧠 Ver intentos de acceso (admin)</h2>
+  <form id="form-login-attempts"><h2>8. Ver intentos de acceso (admin)</h2>
     <input name="token" placeholder="Bearer &lt;TOKEN&gt;" required>
     <button>Ver intentos</button>
     <pre id="out-login-attempts"></pre>
   </form>
 
-  <!-- SCRIPTS -->
   <script>
     const API = window.location.origin;
 
@@ -266,15 +113,7 @@
       try { return JSON.parse(txt); } catch { return txt; }
     }
 
-    // Mostrar formulario activo
-    function showForm(formId) {
-      document.querySelectorAll("form").forEach(f => f.style.display = "none");
-      const target = document.getElementById(formId);
-      if (target) target.style.display = "block";
-    }
-    window.onload = () => showForm("form-login");
-
-    // Mostrar DNI si corresponde
+    // Mostrar/ocultar campo DNI según rol
     const roleSelector = document.getElementById('role');
     const dniField = document.getElementById('dni');
     roleSelector.onchange = () => {
@@ -282,7 +121,6 @@
       dniField.style.display = ['admin', 'profesor'].includes(rol) ? 'block' : 'none';
     };
 
-    // Formularios
     document.getElementById('form-register').onsubmit = async e => {
       e.preventDefault();
       const f = e.target;
@@ -290,11 +128,30 @@
       const email = f.email.value.trim();
       const password = f.password.value.trim();
       const dni = f.dni.value.trim();
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return showAlert('warn', '⚠️ Ingresa un email válido');
-      if (!/^(?=.*[a-zA-Z])(?=.*\d).{6,}$/.test(password)) return showAlert('warn', '⚠️ Contraseña debe tener letras y números');
-      if (['admin', 'profesor'].includes(role) && !/^\d{8}$/.test(dni)) return showAlert('warn', '⚠️ DNI debe tener 8 dígitos');
+
+      // Validación de email
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        showAlert('warn', '⚠️ Ingresa un email válido');
+        return;
+      }
+
+      // Validación de contraseña
+      if (!/^(?=.*[a-zA-Z])(?=.*\d).{6,}$/.test(password)) {
+        showAlert('warn', '⚠️ La contraseña debe tener al menos 6 caracteres, incluyendo letras y números');
+        return;
+      }
+
+      // Validación de DNI si es requerido
+      if (['admin', 'profesor'].includes(role)) {
+        if (!/^\d{8}$/.test(dni)) {
+          showAlert('warn', '⚠️ El DNI debe tener exactamente 8 dígitos numéricos');
+          return;
+        }
+      }
+
       const payload = { email, password, role };
       if (dni) payload.dni = dni;
+
       const out = await call('/auth/register', payload);
       document.getElementById('out-register').innerText = JSON.stringify(out, null, 2);
       showAlert(out.msg?.includes("existe") ? 'warn' : 'success', out.msg || 'Registro fallido');
@@ -305,7 +162,7 @@
       const f = e.target;
       const out = await call('/auth/login', { email:f.email.value, password:f.password.value });
       document.getElementById('out-login').innerText = JSON.stringify(out, null, 2);
-      showAlert(out.access_token ? 'success' : 'error', out.msg || 'Error en login');
+      showAlert(out.access_token ? 'success' : 'error', out.msg || 'Error al hacer login');
     };
 
     document.getElementById('form-setup-mfa').onsubmit = async e => {
@@ -331,16 +188,19 @@
       const out = await call('/auth/login-mfa', { email:f.email.value, code:f.code.value });
       const outBox = document.getElementById('out-login-mfa');
       const tokenBox = document.getElementById('token-box');
+
       if (out.access_token) {
         const bearer = "Bearer " + out.access_token;
         const perfil = await call('/user/profile', {}, { method: 'GET', auth: bearer });
+
         if (perfil.role === 'admin') {
           localStorage.setItem('admin_token', bearer);
           showAlert('success', 'Login como admin exitoso. Redirigiendo...');
           window.location.href = '/static/admin.html';
           return;
         }
-        outBox.innerText = "Token generado con éxito. Cópialo y pégalo en el 'ver perfil' para comprobar que funciona correctamente :)";
+
+        outBox.innerText = "Token generado con éxito. Cópialo y pégalo en el paso 6 ↓";
         tokenBox.style.display = 'block';
         tokenBox.innerText = bearer;
         document.querySelector('#form-profile input[name="token"]').value = bearer;

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Autenticación MFA - EduAuth</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <h1>Autenticación con segundo factor</h1>
+  <div id="alert" class="alert"></div>
+
+  <!-- Paso 3: Generar QR -->
+  <form id="form-setup-mfa">
+    <h2>Generar QR para TOTP</h2>
+    <input name="email" placeholder="Email" required>
+    <button>Generar QR</button>
+    <img id="qr-img" alt="QR TOTP" style="display:block; margin:1rem 0; max-width:200px;">
+  </form>
+
+  <!-- Paso 4: Verificar código TOTP -->
+  <form id="form-verify-mfa">
+    <h2>Verificar código MFA</h2>
+    <input name="email" placeholder="Email" required>
+    <input name="code" placeholder="Código TOTP" required>
+    <button>Activar MFA</button>
+  </form>
+
+  <!-- Paso 5: Login MFA -->
+  <form id="form-login-mfa">
+    <h2>Login con MFA</h2>
+    <input name="email" placeholder="Email" required>
+    <input name="code" placeholder="Código TOTP" required>
+    <button>Login MFA</button>
+    <code id="token-box" style="display: none;"></code>
+  </form>
+
+  <p><a href="login.html">Volver al login</a></p>
+
+  <script src="js/utils.js"></script>
+  <script src="js/mfa.js"></script>
+</body>
+</html>
